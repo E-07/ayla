@@ -1,41 +1,31 @@
 # Atualmente a Ayla é em JavaScript, Estou passando ela para Python...
-
-# Discord
 import discord
 from discord.ext import commands
-
-# Files
 import os
-import json
+from server import run
 
+bot = commands.Bot(command_prefix=".")
 
-def load_file():
-	with open("config.json", "r") as file:
-		return json.load(file)
-
-
-config = load_file()
-
-bot = commands.Bot(
-    command_prefix=config["prefix"])  # Prefixo secundário para testes :0
-
-
-@bot.event
-async def on_ready():
-	print("Estou Rodando!")
-
-
-@bot.event
-async def on_message(message):
-	if message.author.bot:  # Se a mensagem for de bot retorna nada.
-		return
-	else:
-		await bot.process_commands(message)
+for filename in os.listdir("./cogs"):
+	if filename.endswith(".py") and filename != "__init__.py":
+		bot.load_extension(f'cogs.{filename[:-3]}')
 
 
 @bot.command()
-async def ping(ctx):
-	await ctx.send("Pong")
+async def load(ctx, extension):
+	bot.load_extension(f"cogs.{extension}")
 
 
+@bot.command()
+async def unload(ctx, extension):
+	bot.unload_extension(f"cogs.{extension}")
+
+
+@bot.command()
+async def reload(ctx, extension):
+	bot.unload_extension(f"cogs.{extension}")
+	bot.load_extension(f"cogs.{extension}")
+
+
+run()
 bot.run(os.getenv("TOKEN"))
